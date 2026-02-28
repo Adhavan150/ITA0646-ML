@@ -1,0 +1,44 @@
+import pandas as pd
+# Load the dataset
+df = pd.read_csv('data.csv')
+# Initialize the specific and general hypotheses
+def initialize_hypotheses(df):
+ num_features = len(df.columns) - 2 # Exclude 'Example' and 'Target Concept'
+ specific_hypothesis = ['?' for _ in range(num_features)]
+ general_hypotheses = [['?' for _ in range(num_features)] for _ in range(2**num_features)]
+ return specific_hypothesis, general_hypotheses
+def update_hypotheses(specific_hypothesis, general_hypotheses, instance, target_concept):
+ if target_concept == 'Malignant (+)':
+ if specific_hypothesis == ['?'] * len(specific_hypothesis):
+ specific_hypothesis = list(instance)
+ else:
+ for i in range(len(specific_hypothesis)):
+ if specific_hypothesis[i] != instance[i]:
+ specific_hypothesis[i] = '?'
+
+ # Remove more general hypotheses that are inconsistent with the new specific hypothesis
+ general_hypotheses = [h for h in general_hypotheses if consistent(h, instance)]
+ elif target_concept == 'Benign (-)':
+# Remove specific hypotheses that are inconsistent with the negative example
+ specific_hypothesis = [sh if sh == '?' or sh == v else '?' for sh, v in zip(specific_hypothesis, instance)]
+ # Remove specific hypotheses that are inconsistent with the negative example
+ general_hypotheses = [g for g in general_hypotheses if not consistent(g, instance)]
+ return specific_hypothesis, general_hypotheses
+def consistent(hypothesis, instance):
+ return all(h == '?' or h == v for h, v in zip(hypothesis, instance))
+def candidate_elimination(df):
+ specific_hypothesis, general_hypotheses = initialize_hypotheses(df)
+ for _, row in df.iterrows():
+ instance = list(row[1:-1])
+ target_concept = row['Target Concept']
+ specific_hypothesis, general_hypotheses = update_hypotheses(specific_hypothesis, general_hypotheses,
+instance, target_concept)
+ return specific_hypothesis, general_hypotheses
+# Run Candidate-Elimination
+specific_hypothesis, general_hypotheses = candidate_elimination(df)
+# Output the result
+print("Specific Hypothesis:", specific_hypothesis)
+print("General Hypotheses:")
+for g in general_hypotheses:
+ if any(x != '?' for x in g):
+ print(g)
