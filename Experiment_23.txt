@@ -1,0 +1,24 @@
+import numpy as np
+def relu(x):
+ return np.maximum(0, x)
+def sigmoid(x):
+ return 1 / (1 + np.exp(-x))
+def compute_ann_output(x):
+ w1 = np.array([[0.1, 0.2], [0.3, 0.4], [0.5, 0.6]])
+ b1 = np.array([0.7, 0.8, 0.9])
+ w2 = np.array([[0.9, 0.8, 0.7]])
+ b2 = np.array([0.1])
+
+ # Input to hidden layer
+ z1 = np.dot(w1, x) + b1
+ a1 = relu(z1)
+
+ # Hidden to output layer
+ z2 = np.dot(w2, a1) + b2
+ a2 = sigmoid(z2)
+
+ return a2
+x = np.array([1, 2])
+# Compute the ANN output
+output = compute_ann_output(x)
+print("ANN Output:", output)
